@@ -1,0 +1,13 @@
+### Update
+GRPC localhost:50051/core.Service/Update
+
+{
+  "Event": {"ID": "testEvent"}
+}
+
+### GetSportEvent
+GRPC localhost:50051/core.Service/GetSportEvent
+
+{
+  "EventID": "testEvent"
+}
