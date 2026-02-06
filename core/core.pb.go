@@ -274,19 +274,20 @@ func (b0 GetSportEventResponse_builder) Build() *GetSportEventResponse {
 }
 
 type SportEvent struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
-	ID            string                 `protobuf:"bytes,1,opt,name=ID,proto3" json:"ID,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=Name,proto3" json:"Name,omitempty"`
-	StartTime     string                 `protobuf:"bytes,3,opt,name=StartTime,proto3" json:"StartTime,omitempty"`
-	BettingStatus string                 `protobuf:"bytes,4,opt,name=BettingStatus,proto3" json:"BettingStatus,omitempty"`
-	Markets       []*model.Market        `protobuf:"bytes,5,rep,name=Markets,proto3" json:"Markets,omitempty"`
-	SportTypeID   string                 `protobuf:"bytes,6,opt,name=SportTypeID,proto3" json:"SportTypeID,omitempty"`
-	SportName     string                 `protobuf:"bytes,7,opt,name=SportName,proto3" json:"SportName,omitempty"`
-	Region        string                 `protobuf:"bytes,8,opt,name=Region,proto3" json:"Region,omitempty"`
-	League        string                 `protobuf:"bytes,9,opt,name=League,proto3" json:"League,omitempty"`
-	Round         string                 `protobuf:"bytes,11,opt,name=Round,proto3" json:"Round,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"hybrid.v1"`
+	ID              string                 `protobuf:"bytes,1,opt,name=ID,proto3" json:"ID,omitempty"`
+	Name            string                 `protobuf:"bytes,2,opt,name=Name,proto3" json:"Name,omitempty"`
+	StartTime       string                 `protobuf:"bytes,3,opt,name=StartTime,proto3" json:"StartTime,omitempty"`
+	BettingStatus   string                 `protobuf:"bytes,4,opt,name=BettingStatus,proto3" json:"BettingStatus,omitempty"`
+	Markets         []*model.Market        `protobuf:"bytes,5,rep,name=Markets,proto3" json:"Markets,omitempty"`
+	SportTypeID     string                 `protobuf:"bytes,6,opt,name=SportTypeID,proto3" json:"SportTypeID,omitempty"`
+	SportName       string                 `protobuf:"bytes,7,opt,name=SportName,proto3" json:"SportName,omitempty"`
+	Region          string                 `protobuf:"bytes,8,opt,name=Region,proto3" json:"Region,omitempty"`
+	League          string                 `protobuf:"bytes,9,opt,name=League,proto3" json:"League,omitempty"`
+	Round           string                 `protobuf:"bytes,11,opt,name=Round,proto3" json:"Round,omitempty"`
+	EventVisibility string                 `protobuf:"bytes,12,opt,name=EventVisibility,proto3" json:"EventVisibility,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *SportEvent) Reset() {
@@ -384,6 +385,13 @@ func (x *SportEvent) GetRound() string {
 	return ""
 }
 
+func (x *SportEvent) GetEventVisibility() string {
+	if x != nil {
+		return x.EventVisibility
+	}
+	return ""
+}
+
 func (x *SportEvent) SetID(v string) {
 	x.ID = v
 }
@@ -424,19 +432,24 @@ func (x *SportEvent) SetRound(v string) {
 	x.Round = v
 }
 
+func (x *SportEvent) SetEventVisibility(v string) {
+	x.EventVisibility = v
+}
+
 type SportEvent_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	ID            string
-	Name          string
-	StartTime     string
-	BettingStatus string
-	Markets       []*model.Market
-	SportTypeID   string
-	SportName     string
-	Region        string
-	League        string
-	Round         string
+	ID              string
+	Name            string
+	StartTime       string
+	BettingStatus   string
+	Markets         []*model.Market
+	SportTypeID     string
+	SportName       string
+	Region          string
+	League          string
+	Round           string
+	EventVisibility string
 }
 
 func (b0 SportEvent_builder) Build() *SportEvent {
@@ -453,6 +466,7 @@ func (b0 SportEvent_builder) Build() *SportEvent {
 	x.Region = b.Region
 	x.League = b.League
 	x.Round = b.Round
+	x.EventVisibility = b.EventVisibility
 	return m0
 }
 
@@ -469,7 +483,7 @@ const file_core_proto_rawDesc = "" +
 	"\x14GetSportEventRequest\x12\x18\n" +
 	"\aEventID\x18\x01 \x01(\tR\aEventID\"?\n" +
 	"\x15GetSportEventResponse\x12&\n" +
-	"\x05Event\x18\x01 \x01(\v2\x10.core.SportEventR\x05Event\"\xa3\x02\n" +
+	"\x05Event\x18\x01 \x01(\v2\x10.core.SportEventR\x05Event\"\xcd\x02\n" +
 	"\n" +
 	"SportEvent\x12\x0e\n" +
 	"\x02ID\x18\x01 \x01(\tR\x02ID\x12\x12\n" +
@@ -481,7 +495,8 @@ const file_core_proto_rawDesc = "" +
 	"\tSportName\x18\a \x01(\tR\tSportName\x12\x16\n" +
 	"\x06Region\x18\b \x01(\tR\x06Region\x12\x16\n" +
 	"\x06League\x18\t \x01(\tR\x06League\x12\x14\n" +
-	"\x05Round\x18\v \x01(\tR\x05Round2\x8c\x01\n" +
+	"\x05Round\x18\v \x01(\tR\x05Round\x12(\n" +
+	"\x0fEventVisibility\x18\f \x01(\tR\x0fEventVisibility2\x8c\x01\n" +
 	"\aService\x125\n" +
 	"\x06Update\x12\x13.core.UpdateRequest\x1a\x14.core.UpdateResponse\"\x00\x12J\n" +
 	"\rGetSportEvent\x12\x1a.core.GetSportEventRequest\x1a\x1b.core.GetSportEventResponse\"\x00B:Z8git.neds.sh/technology/pricekinetics/tools/codetest/coreb\x06proto3"

@@ -15,6 +15,7 @@ func (to *SportEvent) ConvertFromModel(model *model.Event) {
 	to.Name = model.GetName().GetValue()
 	to.StartTime = time.Unix(0, model.StartTime.GetValue()).Format(time.RFC3339)
 	to.BettingStatus = model.GetBettingStatus().GetValue().String()
+	to.EventVisibility = model.GetEventVisibility().GetValue().String()
 	to.SportTypeID = model.GetEventTypeID().GetValue()
 	to.Markets = model.Markets
 	to.League = model.GetSportData().GetLeague().GetValue()

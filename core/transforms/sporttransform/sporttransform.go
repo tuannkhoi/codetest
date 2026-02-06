@@ -26,7 +26,7 @@ func (t *sportTransformClient) TransformEvent(_ context.Context, partialUpdate, 
 ) {
 	var outDelta *model.Event
 	if partialUpdate.EventTypeID == nil {
-		return outDelta, nil // if the EventTypeID didnt update on this update skip processing the event
+		return outDelta, nil // if the EventTypeID didn't update on this update skip processing the event
 	}
 
 	if fullModel.GetSportData().GetName() != nil {

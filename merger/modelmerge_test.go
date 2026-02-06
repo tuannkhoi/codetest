@@ -76,6 +76,23 @@ func TestMergeOptionalBettingStatus(t *testing.T) {
 	}
 }
 
+func TestMergeOptionalEventVisibility(t *testing.T) {
+	left := &model.OptionalEventVisibility{Value: model.EventVisibility_VisibilityDisplayed, Deleted: true}
+	right := &model.OptionalEventVisibility{Value: model.EventVisibility_VisibilityHidden, Deleted: false}
+
+	if got := merger.MergeOptionalEventVisibility(context.Background(), nil, right); got != right {
+		t.Fatalf("expected right when left nil")
+	}
+	if got := merger.MergeOptionalEventVisibility(context.Background(), left, nil); got != left {
+		t.Fatalf("expected left when right nil")
+	}
+
+	out := merger.MergeOptionalEventVisibility(context.Background(), left, right)
+	if out.Value != model.EventVisibility_VisibilityHidden || out.Deleted != false {
+		t.Fatalf("expected right values, got %+v", out)
+	}
+}
+
 func TestMergeSportEvent(t *testing.T) {
 	left := &model.SportEvent{
 		Name:   &model.OptionalString{Value: "Left"},
@@ -191,6 +208,9 @@ func TestMergeEvent(t *testing.T) {
 		BettingStatus: &model.OptionalBettingStatus{
 			Value: model.BettingStatus_BettingOpen,
 		},
+		EventVisibility: &model.OptionalEventVisibility{
+			Value: model.EventVisibility_VisibilityDisplayed,
+		},
 		SportData: &model.SportEvent{
 			Name:   &model.OptionalString{Value: "LeftSport"},
 			League: &model.OptionalString{Value: "LeftLeague"},
@@ -206,6 +226,9 @@ func TestMergeEvent(t *testing.T) {
 		StartTime:   &model.OptionalInt64{Value: 2},
 		BettingStatus: &model.OptionalBettingStatus{
 			Value: model.BettingStatus_BettingClosed,
+		},
+		EventVisibility: &model.OptionalEventVisibility{
+			Value: model.EventVisibility_VisibilityHidden,
 		},
 		SportData: &model.SportEvent{
 			Name:   &model.OptionalString{Value: "RightSport"},
@@ -229,7 +252,8 @@ func TestMergeEvent(t *testing.T) {
 		t.Fatalf("expected ID %q, got %q", "evt-1", out.ID)
 	}
 	if out.Name.Value != "Right" || out.StartTime.Value != 2 ||
-		out.BettingStatus.Value != model.BettingStatus_BettingClosed {
+		out.BettingStatus.Value != model.BettingStatus_BettingClosed ||
+		out.EventVisibility.Value != model.EventVisibility_VisibilityHidden {
 		t.Fatalf("expected right values, got %+v", out)
 	}
 	if out.SportData.Name.Value != "RightSport" || out.SportData.League.Value != "RightLeague" {

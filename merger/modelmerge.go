@@ -12,6 +12,12 @@ func MergeBettingStatus(_ context.Context, _, right model.BettingStatus) model.B
 	return right
 }
 
+// MergeEventVisibility generates a merged value between two members of the enumeration EventVisibility
+func MergeEventVisibility(_ context.Context, _, right model.EventVisibility) model.EventVisibility {
+	// For enumerated types, we simply return the right operand
+	return right
+}
+
 // MergeOptionalBettingStatus generates a new instance of the OptionalBettingStatus type, where two input values are
 // merged. Values on the left are overwritten with values from the right where they exist, recursively.
 func MergeOptionalBettingStatus(
@@ -29,6 +35,27 @@ func MergeOptionalBettingStatus(
 	result := &model.OptionalBettingStatus{}
 
 	result.Value = MergeBettingStatus(ctx, left.Value, right.Value)
+	result.Deleted = right.Deleted // Copy primitive value from right, as non-pointers.
+	return result
+}
+
+// MergeOptionalEventVisibility generates a new instance of the OptionalEventVisibility type, where two input values are
+// merged. Values on the left are overwritten with values from the right where they exist, recursively.
+func MergeOptionalEventVisibility(
+	ctx context.Context, left, right *model.OptionalEventVisibility,
+) *model.OptionalEventVisibility {
+	// Handle trivial cases
+	if right == nil {
+		return left
+	}
+	if left == nil {
+		return right
+	}
+
+	// Create the new target
+	result := &model.OptionalEventVisibility{}
+
+	result.Value = MergeEventVisibility(ctx, left.Value, right.Value)
 	result.Deleted = right.Deleted // Copy primitive value from right, as non-pointers.
 	return result
 }
@@ -51,8 +78,8 @@ func MergeEvent(ctx context.Context, left, right *model.Event) *model.Event {
 	result.Name = MergeOptionalString(ctx, left.Name, right.Name)
 	result.StartTime = MergeOptionalInt64(ctx, left.StartTime, right.StartTime)
 	result.BettingStatus = MergeOptionalBettingStatus(ctx, left.BettingStatus, right.BettingStatus)
+	result.EventVisibility = MergeOptionalEventVisibility(ctx, left.EventVisibility, right.EventVisibility)
 	result.SportData = MergeSportEvent(ctx, left.SportData, right.SportData)
-
 	// Generate the difference for Markets with a slice of Market
 	mergedMarkets := MergeMarketSlice(ctx, left.Markets, right.Markets)
 	if len(mergedMarkets) > 0 {
