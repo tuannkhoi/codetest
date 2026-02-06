@@ -2,6 +2,7 @@ version: "2"
 
 run:
   timeout: 5m
+  tests: false
 
 issues:
   exclude-files:
@@ -9,12 +10,12 @@ issues:
 
 linters:
   enable:
+    - govet
     - errcheck
     - revive
     - staticcheck
     - lll
     - funlen
-    - goconst
     - unparam
     - unused
     - whitespace
