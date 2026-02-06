@@ -1,3 +1,5 @@
+//go:build integration
+
 package service_test
 
 import (
@@ -6,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"git.neds.sh/technology/pricekinetics/tools/codetest/core"
 	"git.neds.sh/technology/pricekinetics/tools/codetest/core/repository"
@@ -16,13 +19,12 @@ import (
 	"git.neds.sh/technology/pricekinetics/tools/codetest/model"
 )
 
-func TestService_IntegrationTest_NewEvent(t *testing.T) {
-	const eventID = "integration-test-1"
+func setupIntegrationService(t *testing.T, eventID string) (*service.Service, repository.Repository, func()) {
+	t.Helper()
+
 	repo, err := repository.NewRedisRepository(context.Background(), "localhost:6379", "")
-	assert.NoError(t, err)
-	defer func(repo repository.Repository, ctx context.Context, id string) {
-		_ = repo.DeleteEventByID(ctx, id)
-	}(repo, context.Background(), eventID)
+	require.NoError(t, err)
+
 	host := &service.Service{
 		Upstreams: &service.Upstreams{
 			MergerClient: merger.NewInlineMergerClient(),
@@ -32,6 +34,18 @@ func TestService_IntegrationTest_NewEvent(t *testing.T) {
 			},
 		},
 	}
+
+	cleanup := func() {
+		_ = repo.DeleteEventByID(context.Background(), eventID)
+	}
+
+	return host, repo, cleanup
+}
+
+func TestService_Update(t *testing.T) {
+	const eventID = "integration-test-1"
+	host, _, cleanup := setupIntegrationService(t, eventID)
+	defer cleanup()
 
 	output, err := host.Update(context.Background(), &core.UpdateRequest{
 		Event: &model.Event{
@@ -66,4 +80,29 @@ func TestService_IntegrationTest_NewEvent(t *testing.T) {
 	assert.Equal(t, "soccer", final.Event.SportTypeID)
 	assert.Equal(t, "Soccer", final.Event.SportName)
 	assert.Equal(t, "New Market", final.Event.Markets[0].Name.Value)
+}
+
+func TestService_GetSportEvent(t *testing.T) {
+	const eventID = "integration-test-2"
+	host, _, cleanup := setupIntegrationService(t, eventID)
+	defer cleanup()
+
+	_, err := host.Update(context.Background(), &core.UpdateRequest{
+		Event: &model.Event{
+			ID:          eventID,
+			Name:        &model.OptionalString{Value: "GetSportEvent"},
+			EventTypeID: &model.OptionalString{Value: "soccer"},
+			StartTime:   &model.OptionalInt64{Value: 1758244443000000000}, // Friday, September 19, 2025 11:14:03 AM GMT+10:00
+		},
+	})
+	require.NoError(t, err)
+
+	resp, err := host.GetSportEvent(context.Background(), &core.GetSportEventRequest{EventID: eventID})
+	require.NoError(t, err)
+
+	assert.Equal(t, eventID, resp.Event.ID)
+	assert.Equal(t, "GetSportEvent", resp.Event.Name)
+	assert.Contains(t, resp.Event.StartTime, "2025-09-19")
+	assert.Equal(t, "soccer", resp.Event.SportTypeID)
+	assert.Equal(t, "Soccer", resp.Event.SportName)
 }
