@@ -1,4 +1,4 @@
-// Package sporttransform supplies a sporttransformClient
+// Package sporttransform supplies a sportTransformClient
 package sporttransform
 
 import (
@@ -8,11 +8,11 @@ import (
 	"git.neds.sh/technology/pricekinetics/tools/codetest/model"
 )
 
-type sporttransformClient struct{}
+type sportTransformClient struct{}
 
 // NewSportTransformClient creates a new Sport transform client
 func NewSportTransformClient() transforms.TransformClient {
-	return &sporttransformClient{}
+	return &sportTransformClient{}
 }
 
 var sportTypeMap = map[string]string{
@@ -20,10 +20,12 @@ var sportTypeMap = map[string]string{
 	"rugby_league": "Rugby League",
 }
 
-// TransformEvent performs sport specifc transformation on the Event
-func (t *sporttransformClient) TransformEvent(_ context.Context, parialUpdate, fullModel *model.Event) (*model.Event, error) {
+// TransformEvent performs sport specific transformation on the Event
+func (t *sportTransformClient) TransformEvent(_ context.Context, partialUpdate, fullModel *model.Event) (
+	*model.Event, error,
+) {
 	var outDelta *model.Event
-	if parialUpdate.EventTypeID == nil {
+	if partialUpdate.EventTypeID == nil {
 		return outDelta, nil // if the EventTypeID didnt update on this update skip processing the event
 	}
 
@@ -33,14 +35,17 @@ func (t *sporttransformClient) TransformEvent(_ context.Context, parialUpdate, f
 
 	sportName := sportTypeMap[fullModel.GetEventTypeID().GetValue()]
 	if sportName == "" {
-		return outDelta, nil // unknown sport type so dont change anything
+		return outDelta, nil // unknown sport type so don't change anything
 	}
 
-	outDelta = &model.Event{ID: parialUpdate.ID, SportData: &model.SportEvent{Name: &model.OptionalString{Value: sportName}}}
+	outDelta = &model.Event{
+		ID:        partialUpdate.ID,
+		SportData: &model.SportEvent{Name: &model.OptionalString{Value: sportName}},
+	}
 
 	return outDelta, nil
 }
 
-func (t *sporttransformClient) GetName() string {
+func (t *sportTransformClient) GetName() string {
 	return "SportsTransform"
 }

@@ -9,10 +9,7 @@ tools=(
 
 # Code Quality
 checks=(
-	golang.org/x/lint/golint@latest
-	github.com/kisielk/errcheck@latest
-    honnef.co/go/tools/cmd/staticcheck@latest
-	github.com/mgechev/revive@latest
+	github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 )
 
 

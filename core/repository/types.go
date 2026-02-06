@@ -6,7 +6,7 @@ import (
 	"git.neds.sh/technology/pricekinetics/tools/codetest/model"
 )
 
-// Repository is an interface for something that can Retrieve, Update and remove Events from a persistance layer
+// Repository is an interface for something that can Retrieve, Update and remove Events from a persistence layer
 type Repository interface {
 	HealthCheck(ctx context.Context) bool
 	GetEventByID(ctx context.Context, id string) (*model.Event, error)

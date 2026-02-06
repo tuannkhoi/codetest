@@ -9,17 +9,18 @@ import (
 	"syscall"
 	"time"
 
+	log "github.com/sirupsen/logrus"
+	"github.com/urfave/cli"
+	_ "google.golang.org/grpc/encoding/proto"
+
 	"git.neds.sh/technology/pricekinetics/tools/codetest/core/repository"
 	"git.neds.sh/technology/pricekinetics/tools/codetest/core/service"
 	"git.neds.sh/technology/pricekinetics/tools/codetest/core/transforms"
 	"git.neds.sh/technology/pricekinetics/tools/codetest/core/transforms/sporttransform"
 	"git.neds.sh/technology/pricekinetics/tools/codetest/merger"
-	log "github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
-	_ "google.golang.org/grpc/encoding/proto"
 )
 
-var (
+const (
 	// AppName - to allow overrides at build time
 	AppName = "merger"
 

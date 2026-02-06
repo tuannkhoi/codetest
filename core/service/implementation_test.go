@@ -2,7 +2,10 @@ package service_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"git.neds.sh/technology/pricekinetics/tools/codetest/core"
 	"git.neds.sh/technology/pricekinetics/tools/codetest/core/repository"
@@ -11,13 +14,15 @@ import (
 	"git.neds.sh/technology/pricekinetics/tools/codetest/core/transforms/sporttransform"
 	"git.neds.sh/technology/pricekinetics/tools/codetest/merger"
 	"git.neds.sh/technology/pricekinetics/tools/codetest/model"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestService_IntegrationTest_NewEvent(t *testing.T) {
+	const eventID = "integration-test-1"
 	repo, err := repository.NewRedisRepository(context.Background(), "localhost:6379", "")
 	assert.NoError(t, err)
-	defer repo.DeleteEventByID(context.Background(), "integration-test-1")
+	defer func(repo repository.Repository, ctx context.Context, id string) {
+		_ = repo.DeleteEventByID(ctx, id)
+	}(repo, context.Background(), eventID)
 	host := &service.Service{
 		Upstreams: &service.Upstreams{
 			MergerClient: merger.NewInlineMergerClient(),
@@ -30,18 +35,18 @@ func TestService_IntegrationTest_NewEvent(t *testing.T) {
 
 	output, err := host.Update(context.Background(), &core.UpdateRequest{
 		Event: &model.Event{
-			ID:          "integration-test-1",
+			ID:          eventID,
 			Name:        &model.OptionalString{Value: "Test event"},
 			EventTypeID: &model.OptionalString{Value: "soccer"},
 			StartTime:   &model.OptionalInt64{Value: 1758244443000000000}, // Friday, September 19, 2025 11:14:03 AM GMT+10:00
 		},
 	})
 	assert.NoError(t, err)
-	assert.Equal(t, "New Event born integration-test-1", output.Message)
+	assert.Equal(t, fmt.Sprintf("New Event born %s", eventID), output.Message)
 
 	output, err = host.Update(context.Background(), &core.UpdateRequest{
 		Event: &model.Event{
-			ID: "integration-test-1",
+			ID: eventID,
 			Markets: []*model.Market{
 				{
 					ID:   "mkt01",
@@ -54,7 +59,7 @@ func TestService_IntegrationTest_NewEvent(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "Success", output.Message)
 
-	final, err := host.GetSportEvent(context.Background(), &core.GetSportEventRequest{EventID: "integration-test-1"})
+	final, err := host.GetSportEvent(context.Background(), &core.GetSportEventRequest{EventID: eventID})
 	assert.NoError(t, err)
 	assert.Equal(t, "Test event", final.Event.Name)
 	assert.Contains(t, final.Event.StartTime, "2025-09-19")

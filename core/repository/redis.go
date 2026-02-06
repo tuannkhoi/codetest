@@ -4,18 +4,20 @@ package repository
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 
-	"git.neds.sh/technology/pricekinetics/tools/codetest/model"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
+
+	"git.neds.sh/technology/pricekinetics/tools/codetest/model"
 )
 
 type redisRepo struct {
 	client *redis.Client
 }
 
-// NewRedisRepository creates a new instance of a Repository using Redis as the persistance layer
+// NewRedisRepository creates a new instance of a Repository using Redis as the persistence layer
 func NewRedisRepository(ctx context.Context, address string, password string) (Repository, error) {
 	// Connect to Redis
 	rdb := redis.NewClient(&redis.Options{
@@ -60,7 +62,7 @@ func (c *redisRepo) UpdateEvent(ctx context.Context, event *model.Event) error {
 
 func (c *redisRepo) GetEventByID(ctx context.Context, id string) (*model.Event, error) {
 	rslt, err := c.client.Get(ctx, id).Result()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		logrus.Infof("Event not found")
 		return nil, nil
 	} else if err != nil {

@@ -5,12 +5,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
+
 	"git.neds.sh/technology/pricekinetics/tools/codetest/core"
 	"git.neds.sh/technology/pricekinetics/tools/codetest/core/repository"
 	"git.neds.sh/technology/pricekinetics/tools/codetest/core/transforms"
 	"git.neds.sh/technology/pricekinetics/tools/codetest/merger"
-	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
 )
 
 // Upstreams defines dependencies the service has on other services
@@ -20,9 +21,9 @@ type Upstreams struct {
 	Transforms   []transforms.TransformClient
 }
 
-// NewService creqtes a new instancxe of Service
-func NewService(grpcPort, httpport int, upstreams *Upstreams) *Service {
-	return &Service{GRPCPort: grpcPort, HTTPPort: httpport, Upstreams: upstreams}
+// NewService creates a new instance of Service
+func NewService(grpcPort, httpPort int, upstreams *Upstreams) *Service {
+	return &Service{GRPCPort: grpcPort, HTTPPort: httpPort, Upstreams: upstreams}
 }
 
 // RegisterGRPCServerImplementations registers the grpc service contract implemented by this server
@@ -74,8 +75,11 @@ func (host *Service) Update(ctx context.Context, req *core.UpdateRequest) (*core
 	return resp, nil
 }
 
-// GetSportEvent retrieves a model.Event from the database and returns a core.SportEvent - this is a more UserConsumable representation of the model that is specific to sport events
-func (host *Service) GetSportEvent(ctx context.Context, req *core.GetSportEventRequest) (*core.GetSportEventResponse, error) {
+// GetSportEvent retrieves a model.Event from the database and returns a core.SportEvent,
+// this is a more UserConsumable representation of the model that is specific to sport events
+func (host *Service) GetSportEvent(ctx context.Context, req *core.GetSportEventRequest) (
+	*core.GetSportEventResponse, error,
+) {
 	existing, err := host.Upstreams.Repo.GetEventByID(ctx, req.GetEventID())
 	if err != nil {
 		logrus.WithError(err).Error("GetSportEvent: failed to retrieve event")

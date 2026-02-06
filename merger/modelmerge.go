@@ -1,24 +1,22 @@
 package merger
 
-// Package merging merges instance of the codetest models
-//lint:file-ignore SA4006 Generated code, potentially empty
-//lint:file-ignore SA9003 Generated code, potentially empty
-//lint:file-ignore SA1019 Deprecated code
-
 import (
 	"context"
+
 	"git.neds.sh/technology/pricekinetics/tools/codetest/model"
 )
 
 // MergeBettingStatus generates a merged value between two members of the enumeration BettingStatus
-func MergeBettingStatus(ctx context.Context, left, right model.BettingStatus) model.BettingStatus {
+func MergeBettingStatus(_ context.Context, _, right model.BettingStatus) model.BettingStatus {
 	// For enumerated types, we simply return the right operand
 	return right
 }
 
-// MergeOptionalBettingStatus generates a new instance of the OptionalBettingStatus type, where two input values are merged. Values on the left
-// are overwritten with values from the right where they exist, recursively.
-func MergeOptionalBettingStatus(ctx context.Context, left, right *model.OptionalBettingStatus) *model.OptionalBettingStatus {
+// MergeOptionalBettingStatus generates a new instance of the OptionalBettingStatus type, where two input values are
+// merged. Values on the left are overwritten with values from the right where they exist, recursively.
+func MergeOptionalBettingStatus(
+	ctx context.Context, left, right *model.OptionalBettingStatus,
+) *model.OptionalBettingStatus {
 	// Handle trivial cases
 	if right == nil {
 		return left
@@ -64,8 +62,8 @@ func MergeEvent(ctx context.Context, left, right *model.Event) *model.Event {
 	return result
 }
 
-// MergeSportEvent generates a new instance of the SportEvent type, where two input values are merged. Values on the left
-// are overwritten with values from the right where they exist, recursively.
+// MergeSportEvent generates a new instance of the SportEvent type, where two input values are merged. Values on the
+// left are overwritten with values from the right where they exist, recursively.
 func MergeSportEvent(ctx context.Context, left, right *model.SportEvent) *model.SportEvent {
 	// Handle trivial cases
 	if right == nil {
@@ -133,9 +131,9 @@ func MergeSelection(ctx context.Context, left, right *model.Selection) *model.Se
 	return result
 }
 
-// MergeOptionalString generates a new instance of the OptionalString type, where two input values are merged. Values on the left
-// are overwritten with values from the right where they exist, recursively.
-func MergeOptionalString(ctx context.Context, left, right *model.OptionalString) *model.OptionalString {
+// MergeOptionalString generates a new instance of the OptionalString type, where two input values are merged.
+// Values on the left are overwritten with values from the right where they exist, recursively.
+func MergeOptionalString(_ context.Context, left, right *model.OptionalString) *model.OptionalString {
 	// Handle trivial cases
 	if right == nil {
 		return left
@@ -152,9 +150,10 @@ func MergeOptionalString(ctx context.Context, left, right *model.OptionalString)
 	return result
 }
 
-// MergeOptionalDouble generates a new instance of the OptionalDouble type, where two input values are merged. Values on the left
-// are overwritten with values from the right where they exist, recursively.
-func MergeOptionalDouble(ctx context.Context, left, right *model.OptionalDouble) *model.OptionalDouble {
+// MergeOptionalDouble generates a new instance of the OptionalDouble type, where two input values are merged.
+//
+//	Values on the left are overwritten with values from the right where they exist, recursively.
+func MergeOptionalDouble(_ context.Context, left, right *model.OptionalDouble) *model.OptionalDouble {
 	// Handle trivial cases
 	if right == nil {
 		return left
@@ -171,9 +170,9 @@ func MergeOptionalDouble(ctx context.Context, left, right *model.OptionalDouble)
 	return result
 }
 
-// MergeOptionalInt64 generates a new instance of the OptionalInt64 type, where two input values are merged. Values on the left
-// are overwritten with values from the right where they exist, recursively.
-func MergeOptionalInt64(ctx context.Context, left, right *model.OptionalInt64) *model.OptionalInt64 {
+// MergeOptionalInt64 generates a new instance of the OptionalInt64 type, where two input values are merged.
+// Values on the left are overwritten with values from the right where they exist, recursively.
+func MergeOptionalInt64(_ context.Context, left, right *model.OptionalInt64) *model.OptionalInt64 {
 	// Handle trivial cases
 	if right == nil {
 		return left
