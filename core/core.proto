@@ -22,6 +22,14 @@ message GetSportEventResponse {
   SportEvent Event = 1;
 }
 
+message GetRaceEventRequest {
+  string EventID = 1;
+}
+
+message GetRaceEventResponse {
+  RaceEvent Event = 1;
+}
+
 message SportEvent {
   string                  ID = 1;
   string                  Name = 2;
@@ -36,9 +44,28 @@ message SportEvent {
   string                  EventVisibility = 12;
 }
 
+message RaceEvent {
+  string                  ID = 1;
+  string                  Name = 2;
+  string                  StartTime = 3;
+  string                  BettingStatus = 4;
+  repeated model.Market   Markets = 5;
+  string                  Category = 6;
+  int64                   Distance = 7;
+  string                  RaceCourse = 8;
+  string                  State = 9;
+  string                  EventVisibility = 10;
+}
+
 service Service {
   // Update updates an Event and runs the pipeline of transformations
   rpc Update(UpdateRequest) returns (UpdateResponse) {}
-  // GetSportEvent retrieves a model.Event from the database and returns a core.SportEvent - this is a more UserConsumable representation of the model that is specific to sport events
+
+  // GetSportEvent retrieves a model.Event from the database and returns a core.SportEvent
+  // this is a more UserConsumable representation of the model that is specific to sport events
   rpc GetSportEvent(GetSportEventRequest) returns (GetSportEventResponse) {}
+
+  // GetRaceEvent retrieves a model.Event from the database and returns a core.RaceEvent
+  // this is a more UserConsumable representation of the model that is specific to race events
+  rpc GetRaceEvent(GetRaceEventRequest) returns (GetRaceEventResponse) {}
 }

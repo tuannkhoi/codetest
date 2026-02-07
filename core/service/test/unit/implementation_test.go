@@ -174,3 +174,73 @@ func TestService_GetSportEvent(t *testing.T) {
 		t.Fatalf("expected market ID %q, got %#v", "m1", resp.Event.Markets)
 	}
 }
+
+func TestService_GetRaceEvent(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	repo := mock.NewMockRepository(ctrl)
+	host := &service.Service{
+		Upstreams: &service.Upstreams{
+			MergerClient: merger.NewInlineMergerClient(),
+			Repo:         repo,
+			Transforms: []transforms.TransformClient{
+				sporttransform.NewSportTransformClient(),
+			},
+		},
+	}
+
+	ctx := context.Background()
+	event := &model.Event{
+		ID:        "unit-race-1",
+		Name:      &model.OptionalString{Value: "GetRaceEvent"},
+		StartTime: &model.OptionalInt64{Value: 1758244443000000000},
+		BettingStatus: &model.OptionalBettingStatus{
+			Value: model.BettingStatus_BettingOpen,
+		},
+		EventVisibility: &model.OptionalEventVisibility{
+			Value: model.EventVisibility_VisibilityDisplayed,
+		},
+		RaceData: &model.RaceEvent{
+			Category:   &model.OptionalRaceCategory{Value: model.RaceCategory_RaceCategoryHorse},
+			Distance:   &model.OptionalInt64{Value: 1200},
+			RaceCourse: &model.OptionalString{Value: "flemington"},
+			State:      &model.OptionalString{Value: "VIC"},
+		},
+		Markets: []*model.Market{
+			{ID: "m1"},
+		},
+	}
+
+	repo.EXPECT().GetEventByID(ctx, event.ID).Return(event, nil)
+
+	resp, err := host.GetRaceEvent(ctx, &core.GetRaceEventRequest{EventID: event.ID})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if resp.Event.ID != event.ID {
+		t.Fatalf("expected event ID %q, got %q", event.ID, resp.Event.ID)
+	}
+	if resp.Event.Name != "GetRaceEvent" {
+		t.Fatalf("expected name %q, got %q", "GetRaceEvent", resp.Event.Name)
+	}
+	if resp.Event.Category != "RaceCategoryHorse" {
+		t.Fatalf("expected category %q, got %q", "RaceCategoryHorse", resp.Event.Category)
+	}
+	if resp.Event.Distance != 1200 {
+		t.Fatalf("expected distance %d, got %d", 1200, resp.Event.Distance)
+	}
+	if resp.Event.RaceCourse != "flemington" {
+		t.Fatalf("expected race course %q, got %q", "flemington", resp.Event.RaceCourse)
+	}
+	if resp.Event.State != "VIC" {
+		t.Fatalf("expected state %q, got %q", "VIC", resp.Event.State)
+	}
+	if resp.Event.EventVisibility != "VisibilityDisplayed" {
+		t.Fatalf("expected visibility %q, got %q", "VisibilityDisplayed", resp.Event.EventVisibility)
+	}
+	if len(resp.Event.Markets) != 1 || resp.Event.Markets[0].ID != "m1" {
+		t.Fatalf("expected market ID %q, got %#v", "m1", resp.Event.Markets)
+	}
+}

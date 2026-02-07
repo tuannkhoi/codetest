@@ -10,7 +10,7 @@ import (
 
 type sportTransformClient struct{}
 
-// NewSportTransformClient creates a new Sport transform client
+// NewSportTransformClient creates a new sportTransformClient
 func NewSportTransformClient() transforms.TransformClient {
 	return &sportTransformClient{}
 }
@@ -33,8 +33,8 @@ func (t *sportTransformClient) TransformEvent(_ context.Context, partialUpdate, 
 		return outDelta, nil // no need to update the name if the name already set
 	}
 
-	sportName := sportTypeMap[fullModel.GetEventTypeID().GetValue()]
-	if sportName == "" {
+	sportName, ok := sportTypeMap[fullModel.GetEventTypeID().GetValue()]
+	if !ok {
 		return outDelta, nil // unknown sport type so don't change anything
 	}
 

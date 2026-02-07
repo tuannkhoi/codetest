@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	Service_Update_FullMethodName        = "/core.Service/Update"
 	Service_GetSportEvent_FullMethodName = "/core.Service/GetSportEvent"
+	Service_GetRaceEvent_FullMethodName  = "/core.Service/GetRaceEvent"
 )
 
 // ServiceClient is the client API for Service service.
@@ -29,8 +30,12 @@ const (
 type ServiceClient interface {
 	// Update updates an Event and runs the pipeline of transformations
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
-	// GetSportEvent retrieves a model.Event from the database and returns a core.SportEvent - this is a more UserConsumable representation of the model that is specific to sport events
+	// GetSportEvent retrieves a model.Event from the database and returns a core.SportEvent
+	// this is a more UserConsumable representation of the model that is specific to sport events
 	GetSportEvent(ctx context.Context, in *GetSportEventRequest, opts ...grpc.CallOption) (*GetSportEventResponse, error)
+	// GetRaceEvent retrieves a model.Event from the database and returns a core.RaceEvent
+	// this is a more UserConsumable representation of the model that is specific to race events
+	GetRaceEvent(ctx context.Context, in *GetRaceEventRequest, opts ...grpc.CallOption) (*GetRaceEventResponse, error)
 }
 
 type serviceClient struct {
@@ -61,14 +66,28 @@ func (c *serviceClient) GetSportEvent(ctx context.Context, in *GetSportEventRequ
 	return out, nil
 }
 
+func (c *serviceClient) GetRaceEvent(ctx context.Context, in *GetRaceEventRequest, opts ...grpc.CallOption) (*GetRaceEventResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetRaceEventResponse)
+	err := c.cc.Invoke(ctx, Service_GetRaceEvent_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ServiceServer is the server API for Service service.
 // All implementations should embed UnimplementedServiceServer
 // for forward compatibility.
 type ServiceServer interface {
 	// Update updates an Event and runs the pipeline of transformations
 	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
-	// GetSportEvent retrieves a model.Event from the database and returns a core.SportEvent - this is a more UserConsumable representation of the model that is specific to sport events
+	// GetSportEvent retrieves a model.Event from the database and returns a core.SportEvent
+	// this is a more UserConsumable representation of the model that is specific to sport events
 	GetSportEvent(context.Context, *GetSportEventRequest) (*GetSportEventResponse, error)
+	// GetRaceEvent retrieves a model.Event from the database and returns a core.RaceEvent
+	// this is a more UserConsumable representation of the model that is specific to race events
+	GetRaceEvent(context.Context, *GetRaceEventRequest) (*GetRaceEventResponse, error)
 }
 
 // UnimplementedServiceServer should be embedded to have
@@ -83,6 +102,9 @@ func (UnimplementedServiceServer) Update(context.Context, *UpdateRequest) (*Upda
 }
 func (UnimplementedServiceServer) GetSportEvent(context.Context, *GetSportEventRequest) (*GetSportEventResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetSportEvent not implemented")
+}
+func (UnimplementedServiceServer) GetRaceEvent(context.Context, *GetRaceEventRequest) (*GetRaceEventResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetRaceEvent not implemented")
 }
 func (UnimplementedServiceServer) testEmbeddedByValue() {}
 
@@ -140,6 +162,24 @@ func _Service_GetSportEvent_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Service_GetRaceEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRaceEventRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).GetRaceEvent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Service_GetRaceEvent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).GetRaceEvent(ctx, req.(*GetRaceEventRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Service_ServiceDesc is the grpc.ServiceDesc for Service service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -154,6 +194,10 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetSportEvent",
 			Handler:    _Service_GetSportEvent_Handler,
+		},
+		{
+			MethodName: "GetRaceEvent",
+			Handler:    _Service_GetRaceEvent_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

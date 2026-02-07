@@ -12,6 +12,11 @@ func MergeBettingStatus(_ context.Context, _, right model.BettingStatus) model.B
 	return right
 }
 
+// MergeRaceCategory generates a merged value between two members of the enumeration RaceCategory
+func MergeRaceCategory(_ context.Context, _, right model.RaceCategory) model.RaceCategory {
+	return right
+}
+
 // MergeEventVisibility generates a merged value between two members of the enumeration EventVisibility
 func MergeEventVisibility(_ context.Context, _, right model.EventVisibility) model.EventVisibility {
 	// For enumerated types, we simply return the right operand
@@ -35,6 +40,27 @@ func MergeOptionalBettingStatus(
 	result := &model.OptionalBettingStatus{}
 
 	result.Value = MergeBettingStatus(ctx, left.Value, right.Value)
+	result.Deleted = right.Deleted // Copy primitive value from right, as non-pointers.
+	return result
+}
+
+// MergeOptionalRaceCategory generates a new instance of the OptionalRaceCategory type, where two input values are
+// merged. Values on the left are overwritten with values from the right where they exist, recursively.
+func MergeOptionalRaceCategory(
+	ctx context.Context, left, right *model.OptionalRaceCategory,
+) *model.OptionalRaceCategory {
+	// Handle trivial cases
+	if right == nil {
+		return left
+	}
+	if left == nil {
+		return right
+	}
+
+	// Create the new target
+	result := &model.OptionalRaceCategory{}
+
+	result.Value = MergeRaceCategory(ctx, left.Value, right.Value)
 	result.Deleted = right.Deleted // Copy primitive value from right, as non-pointers.
 	return result
 }
@@ -80,6 +106,7 @@ func MergeEvent(ctx context.Context, left, right *model.Event) *model.Event {
 	result.BettingStatus = MergeOptionalBettingStatus(ctx, left.BettingStatus, right.BettingStatus)
 	result.EventVisibility = MergeOptionalEventVisibility(ctx, left.EventVisibility, right.EventVisibility)
 	result.SportData = MergeSportEvent(ctx, left.SportData, right.SportData)
+	result.RaceData = MergeRaceEvent(ctx, left.RaceData, right.RaceData)
 	// Generate the difference for Markets with a slice of Market
 	mergedMarkets := MergeMarketSlice(ctx, left.Markets, right.Markets)
 	if len(mergedMarkets) > 0 {
@@ -107,6 +134,27 @@ func MergeSportEvent(ctx context.Context, left, right *model.SportEvent) *model.
 	result.Region = MergeOptionalString(ctx, left.Region, right.Region)
 	result.League = MergeOptionalString(ctx, left.League, right.League)
 	result.Round = MergeOptionalString(ctx, left.Round, right.Round)
+	return result
+}
+
+// MergeRaceEvent generates a new instance of the RaceEvent type, where two input values are merged. Values on the
+// left are overwritten with values from the right where they exist, recursively.
+func MergeRaceEvent(ctx context.Context, left, right *model.RaceEvent) *model.RaceEvent {
+	// Handle trivial cases
+	if right == nil {
+		return left
+	}
+	if left == nil {
+		return right
+	}
+
+	// Create the new target
+	result := &model.RaceEvent{}
+
+	result.Category = MergeOptionalRaceCategory(ctx, left.Category, right.Category)
+	result.Distance = MergeOptionalInt64(ctx, left.Distance, right.Distance)
+	result.RaceCourse = MergeOptionalString(ctx, left.RaceCourse, right.RaceCourse)
+	result.State = MergeOptionalString(ctx, left.State, right.State)
 	return result
 }
 
