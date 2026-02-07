@@ -1,4 +1,5 @@
 // Package sporttransform supplies a sportTransformClient
+// which does transformation on fields that are specific to sport events
 package sporttransform
 
 import (
