@@ -5,6 +5,8 @@ package service_test
 import (
 	"context"
 	"fmt"
+	"os"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,7 +24,10 @@ import (
 func setupIntegrationService(t *testing.T, eventID string) (*service.Service, repository.Repository, func()) {
 	t.Helper()
 
-	repo, err := repository.NewRedisRepository(context.Background(), "localhost:6379", "")
+	repo, err := repository.NewMongoRepository(context.Background(), repository.MongoConfig{
+		Host: "localhost",
+		Port: 27017,
+	})
 	require.NoError(t, err)
 
 	host := &service.Service{
@@ -40,6 +45,22 @@ func setupIntegrationService(t *testing.T, eventID string) (*service.Service, re
 	}
 
 	return host, repo, cleanup
+}
+
+func getenvDefault(key, def string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return def
+}
+
+func getenvInt(key string, def int) int {
+	if value, ok := os.LookupEnv(key); ok {
+		if parsed, err := strconv.Atoi(value); err == nil {
+			return parsed
+		}
+	}
+	return def
 }
 
 func TestService_Update(t *testing.T) {

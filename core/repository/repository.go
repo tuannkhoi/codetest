@@ -1,3 +1,4 @@
+// Package repository contains data storage methods
 package repository
 
 import (

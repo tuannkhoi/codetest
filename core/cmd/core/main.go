@@ -40,9 +40,10 @@ func main() {
 	app.Action = func(_ *cli.Context) error {
 		log.SetFormatter(&log.TextFormatter{})
 
-		// technically the address and password should be put in config and .env file,
-		// but for the purpose of the technical test, it's okay to leave them here
-		repo, err := repository.NewRedisRepository(context.Background(), "localhost:6379", "")
+		repo, err := repository.NewMongoRepository(context.Background(), repository.MongoConfig{
+			Host: "localhost",
+			Port: 27017,
+		})
 		if err != nil {
 			return err
 		}

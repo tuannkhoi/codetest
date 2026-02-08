@@ -1,17 +1,8 @@
 version: "3.8"
 services:
-  redis:
-    image: redis:latest
+  mongo:
+    image: mongo:latest
     ports:
-      - "6379:6379"
-    command: redis-server --appendonly yes --protected-mode no
-  redis-commander:
-    container_name: redis-commander
-    hostname: redis-commander
-    image: rediscommander/redis-commander:latest
-    restart: always
-    environment:
-    - REDIS_HOSTS=local:redis:6379
-    ports:
-    - "8081:8081"
-    
+      - "27017:27017"
+    volumes:
+      - ./core/repository/mongo-init:/docker-entrypoint-initdb.d
