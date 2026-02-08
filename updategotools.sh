@@ -5,16 +5,14 @@ tools=(
 	golang.org/x/tools/cmd/goimports@latest
 	github.com/mikefarah/yq/v4@latest
 	google.golang.org/protobuf/cmd/protoc-gen-go
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	go.uber.org/mock/mockgen@latest
 )
 
 # Code Quality
 checks=(
-	golang.org/x/lint/golint@latest
-	github.com/kisielk/errcheck@latest
-    honnef.co/go/tools/cmd/staticcheck@latest
-	github.com/mgechev/revive@latest
+	github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 )
-
 
 bold="\033[1m"
 highlight="\033[32m"

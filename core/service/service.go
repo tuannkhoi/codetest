@@ -11,7 +11,7 @@ import (
 
 	"github.com/gorilla/mux"
 	recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -36,11 +36,12 @@ func (host *Service) Run() error {
 		return fmt.Errorf("service_health_start_failed")
 	}
 
-	log.Info("constructing_grpc_server")
+	logrus.Info("constructing_grpc_server")
 
 	opts := []recovery.Option{
 		recovery.WithRecoveryHandler(func(p interface{}) error {
-			log.WithField("panic", p).WithField("Stack", string(debug.Stack())).Error("request_panic_caught")
+			logrus.WithField("panic", p).
+				WithField("Stack", string(debug.Stack())).Error("request_panic_caught")
 			return fmt.Errorf("server_panic")
 		}),
 	}
@@ -71,34 +72,34 @@ func (host *Service) Run() error {
 	host.shutdownCallbacks = append(host.shutdownCallbacks, func() {
 		errClose := lis.Close()
 		if errClose != nil {
-			log.WithError(errClose).Warn("error_closing_grpc_listener")
+			logrus.WithError(errClose).Warn("error_closing_grpc_listener")
 		}
 	})
 
-	log.WithField("address", serviceAddress).Info("service_start")
-	defer log.WithField("address", serviceAddress).Info("service_stopping")
+	logrus.WithField("address", serviceAddress).Info("service_start")
+	defer logrus.WithField("address", serviceAddress).Info("service_stopping")
 
 	return host.grpcServer.Serve(lis)
 }
 
 // Stop the wrapper service servers
 func (host *Service) Stop(_ context.Context) error {
-	log.Info("service_stop_requested")
-	defer log.Info("service_stop_completed")
+	logrus.Info("service_stop_requested")
+	defer logrus.Info("service_stop_completed")
 	if host.grpcServer != nil {
-		log.Info("service_grpc_stopping")
+		logrus.Info("service_grpc_stopping")
 		host.grpcServer.Stop()
 	} else {
-		log.Warn("grpc_service_shutdown_skipped")
+		logrus.Warn("grpc_service_shutdown_skipped")
 	}
 
-	log.Info("service_stop_callbacks")
+	logrus.Info("service_stop_callbacks")
 	// Stop all shutdown callbacks
 	for i, callback := range host.shutdownCallbacks {
-		log := log.WithField("callback", i)
-		log.Debug("service_stop_callback_start")
+		logger := logrus.WithField("callback", i)
+		logger.Debug("service_stop_callback_start")
 		callback()
-		log.Debug("service_stop_callback_complete")
+		logger.Debug("service_stop_callback_complete")
 	}
 
 	return nil
@@ -124,7 +125,7 @@ func (host *Service) runHTTPServer() error {
 	var errService error
 
 	go func() {
-		log.WithFields(log.Fields{
+		logrus.WithFields(logrus.Fields{
 			"address": address,
 		}).Info("http_listener_starting")
 		routine.Done()
@@ -133,11 +134,11 @@ func (host *Service) runHTTPServer() error {
 			mtx.Lock()
 			errService = err
 			mtx.Unlock()
-			log.WithFields(log.Fields{
+			logrus.WithFields(logrus.Fields{
 				"error": err.Error(),
 			}).Error("http_listener_failed")
 		}
-		log.Info("http_listener_stopped")
+		logrus.Info("http_listener_stopped")
 	}()
 
 	routine.Wait()

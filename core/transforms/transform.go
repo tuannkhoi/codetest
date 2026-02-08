@@ -9,6 +9,6 @@ import (
 
 // TransformClient is an interface representing a service that can perform transformations ion a model
 type TransformClient interface {
-	TransformEvent(ctx context.Context, parialUpdate, fullModel *model.Event) (*model.Event, error)
+	TransformEvent(ctx context.Context, partialUpdate, fullModel *model.Event) (*model.Event, error)
 	GetName() string
 }

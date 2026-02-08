@@ -4,8 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"git.neds.sh/technology/pricekinetics/tools/codetest/model"
 	"github.com/stretchr/testify/assert"
+
+	"git.neds.sh/technology/pricekinetics/tools/codetest/model"
 )
 
 func Test_redisRepo_UpdateEvent(t *testing.T) {

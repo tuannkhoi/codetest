@@ -1,0 +1,37 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: false
+
+issues:
+  exclude-files:
+    - ".*\\.pb\\.go"
+
+linters:
+  enable:
+    - govet
+    - errcheck
+    - revive
+    - staticcheck
+    - lll
+    - funlen
+    - unparam
+    - unused
+    - whitespace
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+    - gci
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(git.neds.sh/technology/pricekinetics/tools/codetest)
+      custom-order: true
+    goimports:
+      local-prefixes:
+        - git.neds.sh/technology/pricekinetics/tools/codetest
