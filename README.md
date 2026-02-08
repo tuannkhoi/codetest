@@ -37,7 +37,7 @@ make test
 
 ### Integration Tests
 
-Integration tests require Docker services (e.g., Redis). The Make target will start Docker Compose for you.
+Integration tests require Docker services (MongoDB). The Make target will start Docker Compose for you.
 
 ```
 make test-integration
@@ -67,9 +67,9 @@ This package merges two partial events together. When adding new fields you will
 
 ### Core
 
-The main service of the code test. This spins up a gRPC server and exposes an RPC to `Update` and another more user-friendly API to retrieve the event `GetSportEvent`.
+The main service of the code test. This spins up a gRPC server and exposes RPCs to update and query events.
 
-It persists the data in Redis and merges a partial update to an event with the existing copy of the event in the database, runs some transformations on the event, and saves back to the database.
+It persists the data in MongoDB and merges a partial update to an event with the existing copy of the event in the database, runs some transformations on the event, and saves back to the database.
 
 ## Service Flow (High Level)
 
@@ -81,13 +81,13 @@ It persists the data in Redis and merges a partial update to an event with the e
 
 ## Generated Code
 
-Proto definitions live in `*.proto` files. Generated files include:
-
-- `core/core.pb.go`
-- `core/core_grpc.pb.go`
-- `model/*.pb.go`
-
+Proto definitions live in `*.proto` files.
 If you need to re-generate proto files, see run `go generate ./...`.
+
+## API (gRPC)
+
+See `API-README.md` for full RPC documentation and example payloads.
+You can also use `test.http` to run example requests directly from GoLand.
 
 ## Notes
 

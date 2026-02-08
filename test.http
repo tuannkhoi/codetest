@@ -1,13 +1,98 @@
-### Update
+### Update Sport Event
 GRPC localhost:50051/core.Service/Update
 
 {
-  "Event": {"ID": "testEvent"}
+  "Event": {
+    "ID": "sport-event-1",
+    "Name": {
+      "Value": "Sydney Roosters vs Melbourne Storm"
+    },
+    "StartTime": {
+      "Value": 1758142685635000000
+    },
+    "BettingStatus": {
+      "Value": "BettingOpen"
+    },
+    "EventVisibility": {
+      "Value": "VisibilityDisplayed"
+    },
+    "EventTypeID": {
+      "Value": "rugby_league"
+    },
+    "SportData": {
+      "Name": { "Value": "Rugby League" },
+      "Region": { "Value": "Australia" },
+      "League": { "Value": "NRL" },
+      "Round": { "Value": "1" }
+    },
+    "Markets": [
+      {
+        "ID": "H2H",
+        "Name": { "Value": "Head to Head" },
+        "StartTime": { "Value": 1758142685635000000 },
+        "BettingStatus": { "Value": "BettingClosed" },
+        "Selections": [
+          {
+            "ID": "home",
+            "Name": { "Value": "Sydney Roosters" },
+            "BettingStatus": { "Value": "BettingSuspended" },
+            "Price": { "Value": 1.01 }
+          },
+          {
+            "ID": "away",
+            "Name": { "Value": "Melbourne Storm" },
+            "BettingStatus": { "Value": "BettingClosed" },
+            "Price": { "Value": 10.0 }
+          }
+        ]
+      }
+    ]
+  }
+}
+
+### Update Race Event
+GRPC localhost:50051/core.Service/Update
+
+{
+  "Event": {
+    "ID": "raceEvent01",
+    "Name": { "Value": "Flemington R1" },
+    "StartTime": { "Value": 1758146285635000000 },
+    "BettingStatus": { "Value": "BettingOpen" },
+    "EventVisibility": { "Value": "VisibilityDisplayed" },
+    "RaceData": {
+      "Category": { "Value": "RaceCategoryHorse" },
+      "Distance": { "Value": 1200 },
+      "RaceCourse": { "Value": "flemington" },
+      "State": { "Value": "VIC" }
+    }
+  }
 }
 
 ### GetSportEvent
 GRPC localhost:50051/core.Service/GetSportEvent
 
 {
-  "EventID": "testEvent"
+  "EventID": "sport-event-1"
+}
+
+### GetRaceEvent
+GRPC localhost:50051/core.Service/GetRaceEvent
+
+{
+  "EventID": "raceEvent01"
+}
+
+### SearchEvents
+GRPC localhost:50051/core.Service/SearchEvents
+
+{
+  "Filter": {
+    "BettingStatus": "BettingOpen",
+    "EventVisibility": "VisibilityDisplayed",
+    "StartDate": "2025-09-10T00:00:00Z",
+    "EndDate": "2025-09-20T00:00:00Z"
+  },
+  "PageSize": 2,
+  "PageToken": ""
 }

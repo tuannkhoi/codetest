@@ -22,6 +22,7 @@ const (
 	Service_Update_FullMethodName        = "/core.Service/Update"
 	Service_GetSportEvent_FullMethodName = "/core.Service/GetSportEvent"
 	Service_GetRaceEvent_FullMethodName  = "/core.Service/GetRaceEvent"
+	Service_SearchEvents_FullMethodName  = "/core.Service/SearchEvents"
 )
 
 // ServiceClient is the client API for Service service.
@@ -36,6 +37,8 @@ type ServiceClient interface {
 	// GetRaceEvent retrieves a model.Event from the database and returns a core.RaceEvent
 	// this is a more UserConsumable representation of the model that is specific to race events
 	GetRaceEvent(ctx context.Context, in *GetRaceEventRequest, opts ...grpc.CallOption) (*GetRaceEventResponse, error)
+	// SearchEvents allows users to search events by date and/or betting status and/or event visibility.
+	SearchEvents(ctx context.Context, in *SearchEventsRequest, opts ...grpc.CallOption) (*SearchEventsResponse, error)
 }
 
 type serviceClient struct {
@@ -76,6 +79,16 @@ func (c *serviceClient) GetRaceEvent(ctx context.Context, in *GetRaceEventReques
 	return out, nil
 }
 
+func (c *serviceClient) SearchEvents(ctx context.Context, in *SearchEventsRequest, opts ...grpc.CallOption) (*SearchEventsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SearchEventsResponse)
+	err := c.cc.Invoke(ctx, Service_SearchEvents_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ServiceServer is the server API for Service service.
 // All implementations should embed UnimplementedServiceServer
 // for forward compatibility.
@@ -88,6 +101,8 @@ type ServiceServer interface {
 	// GetRaceEvent retrieves a model.Event from the database and returns a core.RaceEvent
 	// this is a more UserConsumable representation of the model that is specific to race events
 	GetRaceEvent(context.Context, *GetRaceEventRequest) (*GetRaceEventResponse, error)
+	// SearchEvents allows users to search events by date and/or betting status and/or event visibility.
+	SearchEvents(context.Context, *SearchEventsRequest) (*SearchEventsResponse, error)
 }
 
 // UnimplementedServiceServer should be embedded to have
@@ -105,6 +120,9 @@ func (UnimplementedServiceServer) GetSportEvent(context.Context, *GetSportEventR
 }
 func (UnimplementedServiceServer) GetRaceEvent(context.Context, *GetRaceEventRequest) (*GetRaceEventResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetRaceEvent not implemented")
+}
+func (UnimplementedServiceServer) SearchEvents(context.Context, *SearchEventsRequest) (*SearchEventsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SearchEvents not implemented")
 }
 func (UnimplementedServiceServer) testEmbeddedByValue() {}
 
@@ -180,6 +198,24 @@ func _Service_GetRaceEvent_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Service_SearchEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchEventsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).SearchEvents(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Service_SearchEvents_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).SearchEvents(ctx, req.(*SearchEventsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Service_ServiceDesc is the grpc.ServiceDesc for Service service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -198,6 +234,10 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetRaceEvent",
 			Handler:    _Service_GetRaceEvent_Handler,
+		},
+		{
+			MethodName: "SearchEvents",
+			Handler:    _Service_SearchEvents_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

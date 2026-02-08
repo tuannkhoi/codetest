@@ -121,3 +121,43 @@ func (host *Service) GetRaceEvent(ctx context.Context, req *core.GetRaceEventReq
 
 	return resp, nil
 }
+
+// SearchEvents allows users to search events by date and/or betting status and/or event visibility.
+func (host *Service) SearchEvents(ctx context.Context, req *core.SearchEventsRequest) (
+	*core.SearchEventsResponse, error,
+) {
+	if err := req.Validate(); err != nil {
+		logrus.WithError(err).Error("SearchEvents: failed to validate request")
+		return nil, err
+	}
+
+	events, nextToken, err := host.Upstreams.Repo.SearchEvents(ctx, req.GetFilter(), req.GetPageSize(), req.GetPageToken())
+	if err != nil {
+		logrus.WithError(err).Error("SearchEvents: failed to retrieve events")
+		return nil, err
+	}
+
+	var raceEvents []*core.RaceEvent
+	var sportEvents []*core.SportEvent
+
+	for _, event := range events {
+		// at the moment, an event being inserted is not required to have either RaceEvent or SportEvent
+		// but in the real world (and also for the purpose of this task), it's reasonable to assume that
+		// we can tell which event is race or sport by checking whether race or sport data is present
+		if event.HasRaceData() {
+			raceEvent := &core.RaceEvent{}
+			raceEvent.ConvertFromModel(event)
+			raceEvents = append(raceEvents, raceEvent)
+		} else {
+			sportEvent := &core.SportEvent{}
+			sportEvent.ConvertFromModel(event)
+			sportEvents = append(sportEvents, sportEvent)
+		}
+	}
+
+	return &core.SearchEventsResponse{
+		RaceEvents:    raceEvents,
+		SportEvents:   sportEvents,
+		NextPageToken: nextToken,
+	}, nil
+}
