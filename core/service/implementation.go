@@ -66,8 +66,7 @@ func (host *Service) Update(ctx context.Context, req *core.UpdateRequest) (*core
 		}
 	}
 
-	err = host.Upstreams.Repo.UpdateEvent(ctx, update)
-	if err != nil {
+	if err := host.Upstreams.Repo.UpdateEvent(ctx, update); err != nil {
 		logrus.WithError(err).Error("Update: failed to update event")
 		return nil, err
 	}

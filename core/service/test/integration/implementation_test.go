@@ -53,6 +53,9 @@ func TestService_Update(t *testing.T) {
 			Name:        &model.OptionalString{Value: "Test event"},
 			EventTypeID: &model.OptionalString{Value: "soccer"},
 			StartTime:   &model.OptionalInt64{Value: 1758244443000000000}, // Friday, September 19, 2025 11:14:03 AM GMT+10:00
+			EventVisibility: &model.OptionalEventVisibility{
+				Value: model.EventVisibility_VisibilityDisplayed,
+			},
 		},
 	})
 	assert.NoError(t, err)
@@ -80,6 +83,7 @@ func TestService_Update(t *testing.T) {
 	assert.Equal(t, "soccer", final.Event.SportTypeID)
 	assert.Equal(t, "Soccer", final.Event.SportName)
 	assert.Equal(t, "New Market", final.Event.Markets[0].Name.Value)
+	assert.Equal(t, "VisibilityDisplayed", final.Event.EventVisibility)
 }
 
 func TestService_GetSportEvent(t *testing.T) {
@@ -93,6 +97,9 @@ func TestService_GetSportEvent(t *testing.T) {
 			Name:        &model.OptionalString{Value: "GetSportEvent"},
 			EventTypeID: &model.OptionalString{Value: "soccer"},
 			StartTime:   &model.OptionalInt64{Value: 1758244443000000000}, // Friday, September 19, 2025 11:14:03 AM GMT+10:00
+			EventVisibility: &model.OptionalEventVisibility{
+				Value: model.EventVisibility_VisibilityDisplayed,
+			},
 		},
 	})
 	require.NoError(t, err)
@@ -105,4 +112,5 @@ func TestService_GetSportEvent(t *testing.T) {
 	assert.Contains(t, resp.Event.StartTime, "2025-09-19")
 	assert.Equal(t, "soccer", resp.Event.SportTypeID)
 	assert.Equal(t, "Soccer", resp.Event.SportName)
+	assert.Equal(t, "VisibilityDisplayed", resp.Event.EventVisibility)
 }

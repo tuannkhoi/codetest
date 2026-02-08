@@ -37,6 +37,9 @@ func TestService_Update(t *testing.T) {
 		Name:        &model.OptionalString{Value: "Test event"},
 		EventTypeID: &model.OptionalString{Value: "soccer"},
 		StartTime:   &model.OptionalInt64{Value: 1758244443000000000},
+		EventVisibility: &model.OptionalEventVisibility{
+			Value: model.EventVisibility_VisibilityDisplayed,
+		},
 	}
 
 	repo.EXPECT().GetEventByID(ctx, newEvent.ID).Return(nil, nil)
@@ -49,6 +52,9 @@ func TestService_Update(t *testing.T) {
 		}
 		if evt.GetSportData().GetName().GetValue() != "Soccer" {
 			t.Fatalf("expected sport name %q, got %q", "Soccer", evt.GetSportData().GetName().GetValue())
+		}
+		if evt.GetEventVisibility().GetValue() != model.EventVisibility_VisibilityDisplayed {
+			t.Fatalf("expected visibility %q, got %q", "VisibilityDisplayed", evt.GetEventVisibility().GetValue().String())
 		}
 		return nil
 	})
@@ -63,6 +69,9 @@ func TestService_Update(t *testing.T) {
 		Name:        &model.OptionalString{Value: "Old name"},
 		EventTypeID: &model.OptionalString{Value: "soccer"},
 		StartTime:   &model.OptionalInt64{Value: 1758244443000000000},
+		EventVisibility: &model.OptionalEventVisibility{
+			Value: model.EventVisibility_VisibilityDisplayed,
+		},
 	}
 	update := &model.Event{
 		ID:   existing.ID,
@@ -79,6 +88,9 @@ func TestService_Update(t *testing.T) {
 		}
 		if evt.GetEventTypeID().GetValue() != "soccer" {
 			t.Fatalf("expected event type %q, got %q", "soccer", evt.GetEventTypeID().GetValue())
+		}
+		if evt.GetEventVisibility().GetValue() != model.EventVisibility_VisibilityDisplayed {
+			t.Fatalf("expected visibility %q, got %q", "VisibilityDisplayed", evt.GetEventVisibility().GetValue().String())
 		}
 		return nil
 	})
@@ -119,6 +131,9 @@ func TestService_GetSportEvent(t *testing.T) {
 			Round:  &model.OptionalString{Value: "Round 1"},
 			Region: &model.OptionalString{Value: "EU"},
 		},
+		EventVisibility: &model.OptionalEventVisibility{
+			Value: model.EventVisibility_VisibilityDisplayed,
+		},
 		Markets: []*model.Market{
 			{ID: "m1"},
 		},
@@ -142,6 +157,9 @@ func TestService_GetSportEvent(t *testing.T) {
 	}
 	if resp.Event.SportName != "Soccer" {
 		t.Fatalf("expected sport name %q, got %q", "Soccer", resp.Event.SportName)
+	}
+	if resp.Event.EventVisibility != "VisibilityDisplayed" {
+		t.Fatalf("expected visibility %q, got %q", "VisibilityDisplayed", resp.Event.EventVisibility)
 	}
 	if resp.Event.League != "Premier League" {
 		t.Fatalf("expected league %q, got %q", "Premier League", resp.Event.League)
