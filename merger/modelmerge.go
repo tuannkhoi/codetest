@@ -175,6 +175,7 @@ func MergeMarket(ctx context.Context, left, right *model.Market) *model.Market {
 	result.ID = right.ID // Copy primitive value from right, as non-pointers.
 	result.Name = MergeOptionalString(ctx, left.Name, right.Name)
 	result.StartTime = MergeOptionalInt64(ctx, left.StartTime, right.StartTime)
+	result.ClosedAt = MergeOptionalInt64(ctx, left.ClosedAt, right.ClosedAt)
 	result.BettingStatus = MergeOptionalBettingStatus(ctx, left.BettingStatus, right.BettingStatus)
 
 	// Generate the difference for Selections with a slice of Selection

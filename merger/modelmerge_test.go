@@ -204,6 +204,7 @@ func TestMergeMarket(t *testing.T) {
 		ID:            "mkt-1",
 		Name:          &model.OptionalString{Value: "Left"},
 		StartTime:     &model.OptionalInt64{Value: 1},
+		ClosedAt:      &model.OptionalInt64{Value: 10},
 		BettingStatus: &model.OptionalBettingStatus{Value: model.BettingStatus_BettingOpen},
 		Selections: []*model.Selection{
 			{ID: "s1", Name: &model.OptionalString{Value: "LeftS1"}},
@@ -213,6 +214,7 @@ func TestMergeMarket(t *testing.T) {
 		ID:            "mkt-1",
 		Name:          &model.OptionalString{Value: "Right"},
 		StartTime:     &model.OptionalInt64{Value: 2},
+		ClosedAt:      &model.OptionalInt64{Value: 20},
 		BettingStatus: &model.OptionalBettingStatus{Value: model.BettingStatus_BettingClosed},
 		Selections: []*model.Selection{
 			{ID: "s1", Name: &model.OptionalString{Value: "RightS1"}},
@@ -232,7 +234,7 @@ func TestMergeMarket(t *testing.T) {
 		t.Fatalf("expected ID %q, got %q", "mkt-1", out.ID)
 	}
 	if out.Name.Value != "Right" || out.StartTime.Value != 2 ||
-		out.BettingStatus.Value != model.BettingStatus_BettingClosed {
+		out.ClosedAt.Value != 20 || out.BettingStatus.Value != model.BettingStatus_BettingClosed {
 		t.Fatalf("expected right values, got %+v", out)
 	}
 	if len(out.Selections) != 2 {
@@ -269,7 +271,7 @@ func TestMergeEvent(t *testing.T) {
 			State:      &model.OptionalString{Value: "QLD"},
 		},
 		Markets: []*model.Market{
-			{ID: "m1", Name: &model.OptionalString{Value: "LeftM1"}},
+			{ID: "m1", Name: &model.OptionalString{Value: "LeftM1"}, ClosedAt: &model.OptionalInt64{Value: 10}},
 		},
 	}
 	right := &model.Event{
@@ -294,7 +296,7 @@ func TestMergeEvent(t *testing.T) {
 			State:      &model.OptionalString{Value: "VIC"},
 		},
 		Markets: []*model.Market{
-			{ID: "m1", Name: &model.OptionalString{Value: "RightM1"}},
+			{ID: "m1", Name: &model.OptionalString{Value: "RightM1"}, ClosedAt: &model.OptionalInt64{Value: 20}},
 			{ID: "m2", Name: &model.OptionalString{Value: "RightM2"}},
 		},
 	}
@@ -327,7 +329,8 @@ func TestMergeEvent(t *testing.T) {
 	if len(out.Markets) != 2 {
 		t.Fatalf("expected 2 markets, got %d", len(out.Markets))
 	}
-	if out.Markets[0].ID != "m1" || out.Markets[0].Name.Value != "RightM1" {
+	if out.Markets[0].ID != "m1" || out.Markets[0].Name.Value != "RightM1" ||
+		out.Markets[0].ClosedAt.Value != 20 {
 		t.Fatalf("expected merged market m1, got %+v", out.Markets[0])
 	}
 	if out.Markets[1].ID != "m2" {

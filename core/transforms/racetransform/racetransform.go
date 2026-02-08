@@ -1,4 +1,5 @@
 // Package racetransform supplies a raceTransformClient
+// which does transformation on fields that are specific to race events
 package racetransform
 
 import (
