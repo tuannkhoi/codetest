@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -71,7 +72,24 @@ func (c *mongoRepo) HealthCheck(ctx context.Context) bool {
 func (c *mongoRepo) UpdateEvent(ctx context.Context, event *model.Event) error {
 	collection := c.client.Database(databaseName).Collection(collectionName)
 	filter := bson.M{"_id": event.ID}
-	update := bson.M{"$set": event}
+	docBytes, err := bson.Marshal(event)
+	if err != nil {
+		logrus.Errorf("could not marshal event %v", err)
+		return err
+	}
+
+	var setDoc bson.M
+	if err := bson.Unmarshal(docBytes, &setDoc); err != nil {
+		logrus.Errorf("could not unmarshal event %v", err)
+		return err
+	}
+
+	if event.GetStartTime() != nil {
+		// add field startTimeBSONDate (native type for time) in Mongo to helps with querying on startTime
+		setDoc["startTimeBSONDate"] = time.Unix(0, event.GetStartTime().GetValue())
+	}
+
+	update := bson.M{"$set": setDoc}
 	opts := options.UpdateOne().SetUpsert(true)
 
 	if _, err := collection.UpdateOne(ctx, filter, update, opts); err != nil {
