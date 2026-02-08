@@ -91,9 +91,33 @@ func (host *Service) GetSportEvent(ctx context.Context, req *core.GetSportEventR
 		return resp, nil
 	}
 
-	rslt := &core.SportEvent{}
-	rslt.ConvertFromModel(existing)
-	resp.Event = rslt
+	sportEvent := &core.SportEvent{}
+	sportEvent.ConvertFromModel(existing)
+	resp.Event = sportEvent
+
+	return resp, nil
+}
+
+// GetRaceEvent retrieves a model.Event from the database and returns a core.RaceEvent,
+// this is a more UserConsumable representation of the model that is specific to race events
+func (host *Service) GetRaceEvent(ctx context.Context, req *core.GetRaceEventRequest) (
+	*core.GetRaceEventResponse, error,
+) {
+	existing, err := host.Upstreams.Repo.GetEventByID(ctx, req.GetEventID())
+	if err != nil {
+		logrus.WithError(err).Error("GetRaceEvent: failed to retrieve event")
+		return nil, err
+	}
+
+	resp := &core.GetRaceEventResponse{}
+
+	if existing == nil {
+		return resp, nil
+	}
+
+	raceEvent := &core.RaceEvent{}
+	raceEvent.ConvertFromModel(existing)
+	resp.Event = raceEvent
 
 	return resp, nil
 }

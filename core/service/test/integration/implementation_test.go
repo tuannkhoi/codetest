@@ -114,3 +114,39 @@ func TestService_GetSportEvent(t *testing.T) {
 	assert.Equal(t, "Soccer", resp.Event.SportName)
 	assert.Equal(t, "VisibilityDisplayed", resp.Event.EventVisibility)
 }
+
+func TestService_GetRaceEvent(t *testing.T) {
+	const eventID = "integration-test-3"
+	host, _, cleanup := setupIntegrationService(t, eventID)
+	defer cleanup()
+
+	_, err := host.Update(context.Background(), &core.UpdateRequest{
+		Event: &model.Event{
+			ID:        eventID,
+			Name:      &model.OptionalString{Value: "GetRaceEvent"},
+			StartTime: &model.OptionalInt64{Value: 1758244443000000000}, // Friday, September 19, 2025 11:14:03 AM GMT+10:00
+			EventVisibility: &model.OptionalEventVisibility{
+				Value: model.EventVisibility_VisibilityDisplayed,
+			},
+			RaceData: &model.RaceEvent{
+				Category:   &model.OptionalRaceCategory{Value: model.RaceCategory_RaceCategoryHorse},
+				Distance:   &model.OptionalInt64{Value: 1200},
+				RaceCourse: &model.OptionalString{Value: "flemington"},
+				State:      &model.OptionalString{Value: "VIC"},
+			},
+		},
+	})
+	require.NoError(t, err)
+
+	resp, err := host.GetRaceEvent(context.Background(), &core.GetRaceEventRequest{EventID: eventID})
+	require.NoError(t, err)
+
+	assert.Equal(t, eventID, resp.Event.ID)
+	assert.Equal(t, "GetRaceEvent", resp.Event.Name)
+	assert.Contains(t, resp.Event.StartTime, "2025-09-19")
+	assert.Equal(t, "RaceCategoryHorse", resp.Event.Category)
+	assert.Equal(t, int64(1200), resp.Event.Distance)
+	assert.Equal(t, "flemington", resp.Event.RaceCourse)
+	assert.Equal(t, "VIC", resp.Event.State)
+	assert.Equal(t, "VisibilityDisplayed", resp.Event.EventVisibility)
+}

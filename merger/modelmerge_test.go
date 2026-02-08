@@ -93,6 +93,23 @@ func TestMergeOptionalEventVisibility(t *testing.T) {
 	}
 }
 
+func TestMergeOptionalRaceCategory(t *testing.T) {
+	left := &model.OptionalRaceCategory{Value: model.RaceCategory_RaceCategoryGreyhound, Deleted: true}
+	right := &model.OptionalRaceCategory{Value: model.RaceCategory_RaceCategoryHorse, Deleted: false}
+
+	if got := merger.MergeOptionalRaceCategory(context.Background(), nil, right); got != right {
+		t.Fatalf("expected right when left nil")
+	}
+	if got := merger.MergeOptionalRaceCategory(context.Background(), left, nil); got != left {
+		t.Fatalf("expected left when right nil")
+	}
+
+	out := merger.MergeOptionalRaceCategory(context.Background(), left, right)
+	if out.Value != model.RaceCategory_RaceCategoryHorse || out.Deleted != false {
+		t.Fatalf("expected right values, got %+v", out)
+	}
+}
+
 func TestMergeSportEvent(t *testing.T) {
 	left := &model.SportEvent{
 		Name:   &model.OptionalString{Value: "Left"},
@@ -117,6 +134,36 @@ func TestMergeSportEvent(t *testing.T) {
 	out := merger.MergeSportEvent(context.Background(), left, right)
 	if out.Name.Value != "Right" || out.Region.Value != "RightRegion" || out.League.Value != "RightLeague" ||
 		out.Round.Value != "RightRound" {
+		t.Fatalf("expected right values, got %+v", out)
+	}
+}
+
+func TestMergeRaceEvent(t *testing.T) {
+	left := &model.RaceEvent{
+		Category:   &model.OptionalRaceCategory{Value: model.RaceCategory_RaceCategoryGreyhound},
+		Distance:   &model.OptionalInt64{Value: 900},
+		RaceCourse: &model.OptionalString{Value: "left-course"},
+		State:      &model.OptionalString{Value: "QLD"},
+	}
+	right := &model.RaceEvent{
+		Category:   &model.OptionalRaceCategory{Value: model.RaceCategory_RaceCategoryHorse},
+		Distance:   &model.OptionalInt64{Value: 1200},
+		RaceCourse: &model.OptionalString{Value: "right-course"},
+		State:      &model.OptionalString{Value: "VIC"},
+	}
+
+	if got := merger.MergeRaceEvent(context.Background(), nil, right); got != right {
+		t.Fatalf("expected right when left nil")
+	}
+	if got := merger.MergeRaceEvent(context.Background(), left, nil); got != left {
+		t.Fatalf("expected left when right nil")
+	}
+
+	out := merger.MergeRaceEvent(context.Background(), left, right)
+	if out.Category.Value != model.RaceCategory_RaceCategoryHorse ||
+		out.Distance.Value != 1200 ||
+		out.RaceCourse.Value != "right-course" ||
+		out.State.Value != "VIC" {
 		t.Fatalf("expected right values, got %+v", out)
 	}
 }
@@ -215,6 +262,12 @@ func TestMergeEvent(t *testing.T) {
 			Name:   &model.OptionalString{Value: "LeftSport"},
 			League: &model.OptionalString{Value: "LeftLeague"},
 		},
+		RaceData: &model.RaceEvent{
+			Category:   &model.OptionalRaceCategory{Value: model.RaceCategory_RaceCategoryGreyhound},
+			Distance:   &model.OptionalInt64{Value: 900},
+			RaceCourse: &model.OptionalString{Value: "left-course"},
+			State:      &model.OptionalString{Value: "QLD"},
+		},
 		Markets: []*model.Market{
 			{ID: "m1", Name: &model.OptionalString{Value: "LeftM1"}},
 		},
@@ -233,6 +286,12 @@ func TestMergeEvent(t *testing.T) {
 		SportData: &model.SportEvent{
 			Name:   &model.OptionalString{Value: "RightSport"},
 			League: &model.OptionalString{Value: "RightLeague"},
+		},
+		RaceData: &model.RaceEvent{
+			Category:   &model.OptionalRaceCategory{Value: model.RaceCategory_RaceCategoryHorse},
+			Distance:   &model.OptionalInt64{Value: 1200},
+			RaceCourse: &model.OptionalString{Value: "right-course"},
+			State:      &model.OptionalString{Value: "VIC"},
 		},
 		Markets: []*model.Market{
 			{ID: "m1", Name: &model.OptionalString{Value: "RightM1"}},
@@ -258,6 +317,12 @@ func TestMergeEvent(t *testing.T) {
 	}
 	if out.SportData.Name.Value != "RightSport" || out.SportData.League.Value != "RightLeague" {
 		t.Fatalf("expected right sport data, got %+v", out.SportData)
+	}
+	if out.RaceData.Category.Value != model.RaceCategory_RaceCategoryHorse ||
+		out.RaceData.Distance.Value != 1200 ||
+		out.RaceData.RaceCourse.Value != "right-course" ||
+		out.RaceData.State.Value != "VIC" {
+		t.Fatalf("expected right race data, got %+v", out.RaceData)
 	}
 	if len(out.Markets) != 2 {
 		t.Fatalf("expected 2 markets, got %d", len(out.Markets))

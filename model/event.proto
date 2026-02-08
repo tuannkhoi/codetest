@@ -27,6 +27,18 @@ message OptionalEventVisibility {
   bool Deleted = 2;
 }
 
+enum RaceCategory {
+  RaceCategoryUnknown = 0;
+  RaceCategoryHorse = 1;
+  RaceCategoryGreyhound = 2;
+  RaceCategoryHarness = 3;
+}
+
+message OptionalRaceCategory {
+  RaceCategory Value = 1;
+  bool Deleted = 2;
+}
+
 // Event models a betting match/race
 message Event {
   string                  ID = 1;
@@ -37,6 +49,7 @@ message Event {
   OptionalString          EventTypeID = 6;
   SportEvent              SportData = 7;
   OptionalEventVisibility EventVisibility = 8;
+  RaceEvent               RaceData = 9;
 }
 
 // SportEvent models event details that are specific to sports
@@ -45,6 +58,15 @@ message SportEvent {
   OptionalString Region = 2;
   OptionalString League = 3;
   OptionalString Round = 4;
+}
+
+// RaceEvent models event details that are specific to races.
+message RaceEvent {
+  OptionalRaceCategory Category = 1;
+  // Distance is the distance of the race measured in meters.
+  OptionalInt64        Distance = 2;
+  OptionalString       RaceCourse = 3;
+  OptionalString       State = 4;
 }
 
 // Market models a market of betting options e.g Head to Head or Totals

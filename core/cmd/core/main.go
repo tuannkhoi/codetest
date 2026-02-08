@@ -16,6 +16,7 @@ import (
 	"git.neds.sh/technology/pricekinetics/tools/codetest/core/repository"
 	"git.neds.sh/technology/pricekinetics/tools/codetest/core/service"
 	"git.neds.sh/technology/pricekinetics/tools/codetest/core/transforms"
+	"git.neds.sh/technology/pricekinetics/tools/codetest/core/transforms/racetransform"
 	"git.neds.sh/technology/pricekinetics/tools/codetest/core/transforms/sporttransform"
 	"git.neds.sh/technology/pricekinetics/tools/codetest/merger"
 )
@@ -50,6 +51,7 @@ func main() {
 			Repo:         repo,
 			Transforms: []transforms.TransformClient{
 				sporttransform.NewSportTransformClient(),
+				racetransform.NewRaceTransformClient(),
 			},
 		}
 
