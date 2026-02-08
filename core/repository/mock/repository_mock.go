@@ -13,6 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
+	core "git.neds.sh/technology/pricekinetics/tools/codetest/core"
 	model "git.neds.sh/technology/pricekinetics/tools/codetest/model"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -82,6 +83,22 @@ func (m *MockRepository) HealthCheck(ctx context.Context) bool {
 func (mr *MockRepositoryMockRecorder) HealthCheck(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HealthCheck", reflect.TypeOf((*MockRepository)(nil).HealthCheck), ctx)
+}
+
+// SearchEvents mocks base method.
+func (m *MockRepository) SearchEvents(ctx context.Context, filter *core.SearchEventsFilter, pageSize uint64, pageToken string) ([]*model.Event, string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchEvents", ctx, filter, pageSize, pageToken)
+	ret0, _ := ret[0].([]*model.Event)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// SearchEvents indicates an expected call of SearchEvents.
+func (mr *MockRepositoryMockRecorder) SearchEvents(ctx, filter, pageSize, pageToken any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchEvents", reflect.TypeOf((*MockRepository)(nil).SearchEvents), ctx, filter, pageSize, pageToken)
 }
 
 // UpdateEvent mocks base method.

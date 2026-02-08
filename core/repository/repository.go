@@ -4,6 +4,7 @@ package repository
 import (
 	"context"
 
+	"git.neds.sh/technology/pricekinetics/tools/codetest/core"
 	"git.neds.sh/technology/pricekinetics/tools/codetest/model"
 )
 
@@ -15,4 +16,10 @@ type Repository interface {
 	GetEventByID(ctx context.Context, id string) (*model.Event, error)
 	UpdateEvent(ctx context.Context, event *model.Event) error
 	DeleteEventByID(ctx context.Context, id string) error
+	SearchEvents(
+		ctx context.Context,
+		filter *core.SearchEventsFilter,
+		pageSize uint64,
+		pageToken string,
+	) ([]*model.Event, string, error)
 }

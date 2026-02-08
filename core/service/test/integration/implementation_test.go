@@ -5,12 +5,12 @@ package service_test
 import (
 	"context"
 	"fmt"
-	"os"
-	"strconv"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"git.neds.sh/technology/pricekinetics/tools/codetest/core"
 	"git.neds.sh/technology/pricekinetics/tools/codetest/core/repository"
@@ -45,22 +45,6 @@ func setupIntegrationService(t *testing.T, eventID string) (*service.Service, re
 	}
 
 	return host, repo, cleanup
-}
-
-func getenvDefault(key, def string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
-	}
-	return def
-}
-
-func getenvInt(key string, def int) int {
-	if value, ok := os.LookupEnv(key); ok {
-		if parsed, err := strconv.Atoi(value); err == nil {
-			return parsed
-		}
-	}
-	return def
 }
 
 func TestService_Update(t *testing.T) {
@@ -170,4 +154,102 @@ func TestService_GetRaceEvent(t *testing.T) {
 	assert.Equal(t, "flemington", resp.Event.RaceCourse)
 	assert.Equal(t, "VIC", resp.Event.State)
 	assert.Equal(t, "VisibilityDisplayed", resp.Event.EventVisibility)
+}
+
+func TestService_SearchEvents(t *testing.T) {
+	const seedPrefix = "integration-search-"
+	host, repo, _ := setupIntegrationService(t, "")
+
+	seed := seedEvents(t, host, repo, seedPrefix, 15)
+	defer func() {
+		for _, id := range seed {
+			_ = repo.DeleteEventByID(context.Background(), id)
+		}
+	}()
+
+	baseTime := time.Date(2025, 9, 19, 1, 14, 3, 0, time.UTC)
+	filter := &core.SearchEventsFilter{
+		BettingStatus:   model.BettingStatus_BettingOpen.Enum(),
+		EventVisibility: model.EventVisibility_VisibilityDisplayed.Enum(),
+		StartDate:       timestamppb.New(baseTime.Add(2 * time.Minute)),
+		EndDate:         timestamppb.New(baseTime.Add(10 * time.Minute)),
+	}
+
+	pageSize := uint64(5)
+	resp, err := host.SearchEvents(context.Background(), &core.SearchEventsRequest{
+		Filter:   filter,
+		PageSize: &pageSize,
+	})
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp.SportEvents)
+	assert.NotEmpty(t, resp.RaceEvents)
+	assert.NotEmpty(t, resp.NextPageToken)
+
+	pageToken := resp.NextPageToken
+	resp2, err := host.SearchEvents(context.Background(), &core.SearchEventsRequest{
+		Filter:    filter,
+		PageSize:  &pageSize,
+		PageToken: &pageToken,
+	})
+	require.NoError(t, err)
+	assert.NotEmpty(t, resp2.SportEvents)
+	assert.NotEmpty(t, resp2.RaceEvents)
+	if resp2.NextPageToken != "" {
+		assert.NotEqual(t, resp.NextPageToken, resp2.NextPageToken)
+	}
+}
+
+func seedEvents(
+	t *testing.T,
+	host *service.Service,
+	repo repository.Repository,
+	prefix string,
+	count int,
+) []string {
+	t.Helper()
+
+	var ids []string
+	baseTime := time.Date(2025, 9, 19, 1, 14, 3, 0, time.UTC)
+	for i := 0; i < count; i++ {
+		id := fmt.Sprintf("%s%02d", prefix, i)
+		event := &model.Event{
+			ID:        id,
+			Name:      &model.OptionalString{Value: "Search Seed"},
+			StartTime: &model.OptionalInt64{Value: baseTime.Add(time.Duration(i) * time.Minute).UnixNano()},
+			BettingStatus: &model.OptionalBettingStatus{
+				Value: model.BettingStatus_BettingOpen,
+			},
+			EventVisibility: &model.OptionalEventVisibility{
+				Value: model.EventVisibility_VisibilityDisplayed,
+			},
+		}
+		if i%2 == 0 {
+			event.EventTypeID = &model.OptionalString{Value: "soccer"}
+			event.SportData = &model.SportEvent{
+				Name: &model.OptionalString{Value: "Soccer"},
+			}
+		} else {
+			event.RaceData = &model.RaceEvent{
+				Category:   &model.OptionalRaceCategory{Value: model.RaceCategory_RaceCategoryHorse},
+				Distance:   &model.OptionalInt64{Value: 1200},
+				RaceCourse: &model.OptionalString{Value: "flemington"},
+				State:      &model.OptionalString{Value: "VIC"},
+			}
+		}
+		if i%5 == 0 {
+			event.BettingStatus.Value = model.BettingStatus_BettingClosed
+		}
+		if i%5 == 0 {
+			event.EventVisibility.Value = model.EventVisibility_VisibilityHidden
+		}
+
+		_, err := host.Update(context.Background(), &core.UpdateRequest{Event: event})
+		if err != nil {
+			t.Fatalf("failed to seed event: %v", err)
+		}
+
+		ids = append(ids, id)
+	}
+
+	return ids
 }

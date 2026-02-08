@@ -3,6 +3,7 @@ syntax = "proto3";
 package core;
 
 import  "model/event.proto";
+import "google/protobuf/timestamp.proto";
 
 option go_package = "git.neds.sh/technology/pricekinetics/tools/codetest/core";
 
@@ -28,6 +29,25 @@ message GetRaceEventRequest {
 
 message GetRaceEventResponse {
   RaceEvent Event = 1;
+}
+
+message SearchEventsFilter {
+  optional model.BettingStatus       BettingStatus = 1;
+  optional model.EventVisibility     EventVisibility = 2;
+  optional google.protobuf.Timestamp StartDate = 3;
+  optional google.protobuf.Timestamp EndDate = 4;
+}
+
+message SearchEventsRequest {
+  SearchEventsFilter Filter = 1;
+  optional uint64    PageSize = 2;
+  optional string    PageToken = 3;
+}
+
+message SearchEventsResponse {
+  repeated SportEvent SportEvents = 1;
+  repeated RaceEvent  RaceEvents = 2;
+  string              NextPageToken = 3;
 }
 
 message SportEvent {
@@ -68,4 +88,7 @@ service Service {
   // GetRaceEvent retrieves a model.Event from the database and returns a core.RaceEvent
   // this is a more UserConsumable representation of the model that is specific to race events
   rpc GetRaceEvent(GetRaceEventRequest) returns (GetRaceEventResponse) {}
+
+  // SearchEvents allows users to search events by date and/or betting status and/or event visibility.
+  rpc SearchEvents(SearchEventsRequest) returns (SearchEventsResponse) {}
 }

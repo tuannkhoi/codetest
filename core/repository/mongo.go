@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 
+	"git.neds.sh/technology/pricekinetics/tools/codetest/core"
 	"git.neds.sh/technology/pricekinetics/tools/codetest/model"
 )
 
@@ -125,4 +126,87 @@ func (c *mongoRepo) DeleteEventByID(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (c *mongoRepo) SearchEvents(
+	ctx context.Context,
+	filter *core.SearchEventsFilter,
+	pageSize uint64,
+	pageToken string,
+) ([]*model.Event, string, error) {
+	collection := c.client.Database(databaseName).Collection(collectionName)
+
+	query := buildSearchEventsQuery(filter, pageToken)
+
+	if pageSize == 0 || pageSize > 5 {
+		pageSize = 5
+	}
+
+	findOpts := options.Find().
+		SetLimit(int64(pageSize)).
+		SetSort(bson.D{{Key: "_id", Value: 1}})
+
+	cursor, err := collection.Find(ctx, query, findOpts)
+	if err != nil {
+		logrus.Errorf("could not search events %v", err)
+		return nil, "", err
+	}
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		if err := cursor.Close(ctx); err != nil {
+			logrus.Errorf("could not close cursor %v", err)
+		}
+	}(cursor, ctx)
+
+	var events []*model.Event
+	for cursor.Next(ctx) {
+		var event model.Event
+		if err := cursor.Decode(&event); err != nil {
+			logrus.Errorf("could not decode event %v", err)
+			return nil, "", err
+		}
+		events = append(events, &event)
+	}
+	if err := cursor.Err(); err != nil {
+		logrus.Errorf("cursor error %v", err)
+		return nil, "", err
+	}
+
+	var nextToken string
+	if len(events) > 0 && uint64(len(events)) == pageSize {
+		nextToken = events[len(events)-1].ID
+	}
+
+	return events, nextToken, nil
+}
+
+func buildSearchEventsQuery(filter *core.SearchEventsFilter, pageToken string) *bson.M {
+	query := bson.M{}
+
+	if filter.HasBettingStatus() {
+		query["bettingstatus.value"] = filter.GetBettingStatus()
+	}
+
+	if filter.HasEventVisibility() {
+		query["eventvisibility.value"] = filter.GetEventVisibility()
+	}
+
+	if filter.HasStartDate() || filter.HasEndDate() {
+		timeRange := bson.M{}
+
+		if filter.HasStartDate() {
+			timeRange["$gte"] = filter.GetStartDate().AsTime()
+		}
+
+		if filter.HasEndDate() {
+			timeRange["$lte"] = filter.GetEndDate().AsTime()
+		}
+
+		query["startTimeBSONDate"] = timeRange
+	}
+
+	if pageToken != "" {
+		query["_id"] = bson.M{"$gt": pageToken}
+	}
+
+	return &query
 }

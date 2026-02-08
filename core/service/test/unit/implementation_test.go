@@ -244,3 +244,75 @@ func TestService_GetRaceEvent(t *testing.T) {
 		t.Fatalf("expected market ID %q, got %#v", "m1", resp.Event.Markets)
 	}
 }
+
+func TestService_SearchEvents(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	repo := mock.NewMockRepository(ctrl)
+	host := &service.Service{
+		Upstreams: &service.Upstreams{
+			MergerClient: merger.NewInlineMergerClient(),
+			Repo:         repo,
+			Transforms: []transforms.TransformClient{
+				sporttransform.NewSportTransformClient(),
+			},
+		},
+	}
+
+	ctx := context.Background()
+	filter := &core.SearchEventsFilter{
+		BettingStatus:   model.BettingStatus_BettingOpen.Enum(),
+		EventVisibility: model.EventVisibility_VisibilityDisplayed.Enum(),
+	}
+
+	events := []*model.Event{
+		{
+			ID:          "evt-sport-1",
+			Name:        &model.OptionalString{Value: "Sport"},
+			StartTime:   &model.OptionalInt64{Value: 1758244443000000000},
+			EventTypeID: &model.OptionalString{Value: "soccer"},
+			SportData: &model.SportEvent{
+				Name: &model.OptionalString{Value: "Soccer"},
+			},
+			EventVisibility: &model.OptionalEventVisibility{
+				Value: model.EventVisibility_VisibilityDisplayed,
+			},
+		},
+		{
+			ID:        "evt-race-1",
+			Name:      &model.OptionalString{Value: "Race"},
+			StartTime: &model.OptionalInt64{Value: 1758244443000000000},
+			RaceData: &model.RaceEvent{
+				Category: &model.OptionalRaceCategory{Value: model.RaceCategory_RaceCategoryHorse},
+			},
+			EventVisibility: &model.OptionalEventVisibility{
+				Value: model.EventVisibility_VisibilityDisplayed,
+			},
+		},
+	}
+
+	repo.EXPECT().
+		SearchEvents(ctx, filter, uint64(2), "token-1").
+		Return(events, "token-2", nil)
+
+	pageSize := uint64(2)
+	pageToken := "token-1"
+	resp, err := host.SearchEvents(ctx, &core.SearchEventsRequest{
+		Filter:    filter,
+		PageSize:  &pageSize,
+		PageToken: &pageToken,
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.NextPageToken != "token-2" {
+		t.Fatalf("expected next token %q, got %q", "token-2", resp.NextPageToken)
+	}
+	if len(resp.SportEvents) != 1 || resp.SportEvents[0].ID != "evt-sport-1" {
+		t.Fatalf("expected 1 sport event, got %#v", resp.SportEvents)
+	}
+	if len(resp.RaceEvents) != 1 || resp.RaceEvents[0].ID != "evt-race-1" {
+		t.Fatalf("expected 1 race event, got %#v", resp.RaceEvents)
+	}
+}
